@@ -1,0 +1,14 @@
+setuptools 
+wheel 
+scikit-build 
+cmake 
+ninja
+lxml
+beautifulsoup4
+selenium
+ldap3 
+numpy 
+pandas 
+scipy 
+scikit-learn
+pytest
