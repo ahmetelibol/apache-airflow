@@ -4,7 +4,8 @@
 ```bash
 mkdir airflow-docker
 cd airflow-docker
-mkdir logs\mkdir dags
+mkdir logs
+mkdir dags
 mkdir plugins
 ```
 
