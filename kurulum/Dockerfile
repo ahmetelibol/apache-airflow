@@ -14,6 +14,8 @@ RUN apt-get update \
     build-essential libopenmpi-dev \
     gcc \
     g++ \
+    libaio1 \
+    libodbc2 \
     unixodbc \
     unixodbc-dev \
     freetds-dev \
@@ -30,8 +32,10 @@ RUN apt-get update \
     git \
     libopenblas-dev \ 
     libomp-dev \
+    curl \
     wget \
     nano \
+    unzip \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -40,6 +44,20 @@ RUN chmod +x /usr/bin/krb5-config
 
 # Airflow kullanıcısına geç
 USER airflow
+
+# Oracle Instant Client
+RUN mkdir /opt/airflow/oracle \
+    && cd /opt/airflow/oracle
+
+RUN curl -L -o /opt/airflow/oracle/instantclient-basic-linux.x64-23.5.0.24.07.zip https://download.oracle.com/otn_software/linux/instantclient/2350000/instantclient-basic-linux.x64-23.5.0.24.07.zip
+
+RUN  unzip /opt/airflow/oracle/instantclient-basic-linux.x64-23.5.0.24.07.zip -d /opt/airflow/oracle \
+    && rm -rf /opt/airflow/oracle/*.zip
+
+ENV LD_LIBRARY_PATH=/opt/airflow/oracle/instantclient_23_5:${LD_LIBRARY_PATH}
+ENV ORACLE_HOME=/opt/airflow/oracle
+    
+
 COPY requirements.txt /
 
 # Pip komutunu güncelle ve gerekli bağımlılıkları yükle
