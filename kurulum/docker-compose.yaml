@@ -3,7 +3,7 @@ services:
     image: airflow-v2
     container_name: airflow-init
     entrypoint: /bin/bash
-    command: -c "airflow db init && airflow users create --username admin --password mySuperPassword123 --firstname Ahmet --lastname Elibol --role Admin --email ahmet.elibol@xxx.com"
+    command: -c "airflow db init && airflow users create --username admin --password admin123 --firstname Ahmet --lastname Elibol --role Admin --email ahmet.elibol@lokmanhekim.com.tr"
     environment:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
@@ -48,19 +48,19 @@ services:
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
 
       - AIRFLOW__WEBSERVER__RBAC=True
-      - AIRFLOW__WEBSERVER__SECRET_KEY=35d92aa8629c632f587e8f6df70f5a6380fed63ac166f1b68aceb3
+      - AIRFLOW__WEBSERVER__SECRET_KEY=35d92aa8629c632f587e8f6df70f5a31350c578d6380fed63ac166f1b68aceb3
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
       - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
 
       # E-posta ayarlari
       - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=192.168.1.10
+      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
       - AIRFLOW__SMTP__SMTP_STARTTLS=False
       - AIRFLOW__SMTP__SMTP_SSL=False
       - AIRFLOW__SMTP__SMTP_USER=
       - AIRFLOW__SMTP__SMTP_PASSWORD=
       - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@xxx.com
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
     ports:
       - "8080:8080"
     command: webserver
@@ -86,13 +86,13 @@ services:
       
       # E-posta ayarlari
       - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=192.168.1.10
+      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
       - AIRFLOW__SMTP__SMTP_STARTTLS=False
       - AIRFLOW__SMTP__SMTP_SSL=False
       - AIRFLOW__SMTP__SMTP_USER=
       - AIRFLOW__SMTP__SMTP_PASSWORD=
       - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@xxx.com
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
     command: scheduler
     volumes:
       - ./dags:/opt/airflow/dags
@@ -114,13 +114,13 @@ services:
       
       # E-posta ayarlari
       - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=192.168.1.10
+      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
       - AIRFLOW__SMTP__SMTP_STARTTLS=False
       - AIRFLOW__SMTP__SMTP_SSL=False
       - AIRFLOW__SMTP__SMTP_USER=
       - AIRFLOW__SMTP__SMTP_PASSWORD=
       - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@xxx.com
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
     command: celery worker
     volumes:
       - ./dags:/opt/airflow/dags
@@ -139,6 +139,7 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+
     command: triggerer
     volumes:
       - ./dags:/opt/airflow/dags
