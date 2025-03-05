@@ -56,7 +56,6 @@ RUN  unzip /opt/airflow/oracle/instantclient-basic-linux.x64-23.5.0.24.07.zip -d
 
 ENV LD_LIBRARY_PATH=/opt/airflow/oracle/instantclient_23_5:${LD_LIBRARY_PATH}
 ENV ORACLE_HOME=/opt/airflow/oracle
-    
 
 COPY requirements.txt /
 
