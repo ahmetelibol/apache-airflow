@@ -36,11 +36,17 @@ RUN apt-get update \
     wget \
     nano \
     unzip \
+    libffi-dev \
+    samba-client \
+    libsmbclient-dev \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 # Root olarak krb5-config dosyasına yetki ver
 RUN chmod +x /usr/bin/krb5-config
+
+RUN apt-get update && apt-get install -y tzdata
+ENV TZ=Europe/Istanbul
 
 # Airflow kullanıcısına geç
 USER airflow
@@ -63,7 +69,7 @@ COPY requirements.txt /
 RUN pip install --upgrade pip
 
 RUN pip install "apache-airflow[celery]==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
- 
+
 RUN pip install --no-cache-dir \
     "apache-airflow-providers-openlineage==1.12.1" \
     "apache-airflow-providers-microsoft-mssql==3.9.1" \
