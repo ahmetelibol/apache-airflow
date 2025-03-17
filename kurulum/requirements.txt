@@ -9,7 +9,15 @@ selenium
 ldap3 
 numpy 
 pandas 
+pandas-gbq
 scipy 
 scikit-learn
 pytest
 pycryptodome
+pyarrow
+airflow-clickhouse-plugin 
+clickhouse-connect
+clickhouse-sqlalchemy 
+clickhouse-driver
+openpyxl
+smbprotocol
