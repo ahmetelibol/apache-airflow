@@ -1,10 +1,20 @@
+
+networks:
+  airflow_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
 services:
   airflow-init:
-    image: airflow-v2
+    image: airflow-v3
     container_name: airflow-init
     entrypoint: /bin/bash
-    command: -c "airflow db init && airflow users create --username admin --password admin123 --firstname Ahmet --lastname Elibol --role Admin --email ahmet.elibol@lokmanhekim.com.tr"
+    command: -c "airflow db init && airflow users create --username admin --password admin --firstname Admin --lastname Admin --role Admin --email admin@admin.com"
     environment:
+      - TZ=Europe/Istanbul
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=Europe/Istanbul
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -12,6 +22,8 @@ services:
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
     depends_on:
       - postgres
+    networks:
+      - airflow_network
 
   postgres:
     image: postgres:latest
@@ -21,46 +33,40 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-    ports:
-      - "5432:5432"
+    ports: [] 
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    networks:
+        - airflow_network
+ 
   redis:
     image: redis:latest
     container_name: airflow-redis
     restart: always
-    ports:
-      - "6379:6379"
+    ports: []     
+    networks:
+      - airflow_network
 
   webserver:
-    image: airflow-v2
+    image: airflow-v3
     container_name: airflow-webserver
     restart: always
     depends_on:
       - postgres
       - redis
     environment:
+      - TZ=Europe/Istanbul
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=Europe/Istanbul
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
-
+      - AIRFLOW__WEBSERVER__WEB_SERVER_HOST=0.0.0.0
       - AIRFLOW__WEBSERVER__RBAC=True
-      - AIRFLOW__WEBSERVER__SECRET_KEY=35d92aa8629c632f587e8f6df70f5a31350c578d6380fed63ac166f1b68aceb3
+      - AIRFLOW__WEBSERVER__SECRET_KEY=35d92aa8629c632f0030587e8f6df70f5a31350c578d6380fed63ac166f1b68aceb3
       - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
       - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
-
-      # E-posta ayarlari
-      - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
-      - AIRFLOW__SMTP__SMTP_STARTTLS=False
-      - AIRFLOW__SMTP__SMTP_SSL=False
-      - AIRFLOW__SMTP__SMTP_USER=
-      - AIRFLOW__SMTP__SMTP_PASSWORD=
-      - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
     ports:
       - "8080:8080"
     command: webserver
@@ -70,14 +76,18 @@ services:
       - ./plugins:/opt/airflow/plugins
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - airflow_network
 
   scheduler:
-    image: airflow-v2
+    image: airflow-v3
     container_name: airflow-scheduler
     restart: always
     depends_on:
       - webserver
     environment:
+      - TZ=Europe/Istanbul
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=Europe/Istanbul
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -86,26 +96,28 @@ services:
       
       # E-posta ayarlari
       - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
+      - AIRFLOW__SMTP__SMTP_HOST=10.0.0.1
       - AIRFLOW__SMTP__SMTP_STARTTLS=False
       - AIRFLOW__SMTP__SMTP_SSL=False
-      - AIRFLOW__SMTP__SMTP_USER=
-      - AIRFLOW__SMTP__SMTP_PASSWORD=
       - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@admin.com
     command: scheduler
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+    networks:
+      - airflow_network
 
   worker:
-    image: airflow-v2
+    image: airflow-v3
     container_name: airflow-worker
     restart: always
     depends_on:
       - scheduler
     environment:
+      - TZ=Europe/Istanbul
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=Europe/Istanbul
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -114,37 +126,37 @@ services:
       
       # E-posta ayarlari
       - AIRFLOW__EMAIL__EMAIL_BACKEND=airflow.utils.email.send_email_smtp
-      - AIRFLOW__SMTP__SMTP_HOST=10.3.0.200
+      - AIRFLOW__SMTP__SMTP_HOST=10.0.0.1
       - AIRFLOW__SMTP__SMTP_STARTTLS=False
       - AIRFLOW__SMTP__SMTP_SSL=False
-      - AIRFLOW__SMTP__SMTP_USER=
-      - AIRFLOW__SMTP__SMTP_PASSWORD=
       - AIRFLOW__SMTP__SMTP_PORT=25
-      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@lokmanhekim.com.tr
+      - AIRFLOW__SMTP__SMTP_MAIL_FROM=airflow@admin.com
     command: celery worker
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
+    networks:
+      - airflow_network
 
   triggerer:
-    image: airflow-v2
+    image: airflow-v3
     container_name: airflow-triggerer
     restart: always
     depends_on:
       - scheduler
     environment:
+      - TZ=Europe/Istanbul
+      - AIRFLOW__CORE__DEFAULT_TIMEZONE=Europe/Istanbul
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
-
     command: triggerer
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
-
-volumes:
-  postgres_data:
+    networks:
+      - airflow_network
